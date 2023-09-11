@@ -1,0 +1,31 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.4.0
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define CLOUDOGUURL https://raw.githubusercontent.com/cloudogu/plantuml-cloudogu-sprites/master
+
+!include DEVICONS/mysql.puml
+
+title "Diagrama de documentação de estrutura projeto pncp"
+
+AddRelTag("async", $lineStyle = DashedLine())
+
+SHOW_PERSON_PORTRAIT()
+LAYOUT_LEFT_RIGHT()
+
+Person(user, "usuario", "Pessoa que precisa públicar processos/contratos/documentos.")
+
+Container(spa, "WEBV2", "JS", "A principal interface com a qual o usuário interage.")
+Container(api, "APIV2", "PHP", "Lida com as lógicas designadas a ela e envia o payload para o serviço de mensageria.")
+Rel(user, spa, "Acessa a interface através de uma URL usando o protocolo", "https")
+Rel(spa, api, "Envia as requisições para a API usando o protocólo", "https", $tags = "async")
+ContainerDb(db, "Banco de Dados", "MySql", "Armazena os dados referentes aos processos.", $sprite = "mysql")
+Rel_R(api, db, "Lê e escreve em")
+Container(apiPncp, "API PNCP", "PHP", "Consome os dados da fila executa as lógicas de integração com a API do PNCP.")
+Rel(api, apiPncp, "Transmite uma mensagem producer/consumer atraves do RabbitMq para", $tags = "async")
+ContainerDb(dbPncp, "Banco de Dados", "MySql", "Armazena os dados referentes as compras públicas no PNCP.", $sprite = "mysql")
+Rel_R(apiPncp, db, "Lê de")
+Rel_R(apiPncp, dbPncp, "Lê e escreve em")
+System_Ext(pncp, "PNCP", "endpoint", "Responsável por receber e públicar os processos.")
+Rel(apiPncp, pncp, "Faz o envio dos dados atraves do protocólo http para")
+@enduml
