@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PregaoNovaLei\CreatePregaoNovaLeiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/process', CreatePregaoNovaLeiController::class);
+
+//Route::prefix('process')->controller(CreatePregaoNovaLeiController::class)->group(function () {
+//   Route::post('', );
+//});
