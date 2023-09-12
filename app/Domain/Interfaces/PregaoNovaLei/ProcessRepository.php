@@ -8,5 +8,5 @@ interface ProcessRepository
 {
     public function exists(ProcessEntity $user): bool;
 
-    public function create(ProcessEntity $user): ProcessEntity;
+    public function create(ProcessEntity $data): ProcessEntity;
 }

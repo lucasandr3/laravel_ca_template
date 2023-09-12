@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Adapters\Presenters\CreateProcessJsonPresenter;
+use App\Domain\Interfaces\PregaoNovaLei\GetDataItems;
 use App\Domain\Interfaces\PregaoNovaLei\GetDataProcess;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessFactory;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessRepository;
 use App\Domain\UseCases\PregaoNovaLei\CreateProcessOutputPort;
 use App\Factories\PregaoNovaLei\ProcessModelFactory;
+use App\Infra\Database\Repositories\External\Items\ExternalItems;
 use App\Infra\Database\Repositories\External\Process\ExternalProcess;
 use App\Infra\Database\Repositories\PregaoNovaLei\ProcessDatabaseRepository;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(GetDataProcess::class, ExternalProcess::class);
+        $this->app->bind(GetDataItems::class, ExternalItems::class);
     }
 
     /**
