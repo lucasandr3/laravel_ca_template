@@ -4,15 +4,15 @@ namespace App\Repositories\PregaoNovaLei;
 
 use App\Domain\Interfaces\PregaoNovaLei\ProcessEntity;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessRepository;
+use App\Models\PregaoNovaLei\Process;
 
 class ProcessDatabaseRepository implements ProcessRepository
 {
     public function exists(ProcessEntity $process): bool
     {
-//        return User::where([
-//            'name' => $user->getName(),
-//            'email' => (string) $user->getEmail(),
-//        ])->exists();
+        return Process::query()->where([
+            'cod_pregao' => $process->getCnpj(),
+        ])->exists();
 
         return true;
     }

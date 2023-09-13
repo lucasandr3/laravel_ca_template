@@ -10,6 +10,7 @@ class ProcessModelFactory implements ProcessFactory
 {
     public function make(array $attributes = []): ProcessEntity
     {
+
 //        if (isset($attributes['email']) && is_string($attributes['email'])) {
 //            $attributes['email'] = new EmailValueObject($attributes['email']);
 //        }

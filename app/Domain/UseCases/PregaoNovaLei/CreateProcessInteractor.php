@@ -7,6 +7,9 @@ use App\Domain\Interfaces\PregaoNovaLei\GetDataProcess;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessFactory;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessRepository;
 use App\Domain\Interfaces\PregaoNovaLei\ViewModel;
+use App\Infra\Services\DocumentUtils;
+use App\Infra\Services\HttpService;
+use Illuminate\Support\Carbon;
 
 class CreateProcessInteractor implements CreateProcessInputPort
 {
@@ -15,7 +18,9 @@ class CreateProcessInteractor implements CreateProcessInputPort
         private readonly ProcessRepository       $repository,
         private readonly ProcessFactory          $factory,
         private readonly GetDataProcess          $getDataProcess,
-        private readonly GetDataItems            $getDataItems
+        private readonly GetDataItems            $getDataItems,
+        private readonly HttpService             $httpService,
+        private readonly DocumentUtils           $documentUtils
     ) {}
 
     public function createProcess(CreateProcessRequestModel $model): ViewModel
@@ -34,8 +39,8 @@ class CreateProcessInteractor implements CreateProcessInputPort
             'srp' => (bool)$externalProcess->registro_preco,
             'numeroCompra' => $externalProcess->numero,
             'numeroProcesso' => $externalProcess->processo,
-            'dataAberturaProposta' => $instrument === CONFIG_INSTRUMENTO_ATO ? '' : $externalProcess->dat_publicacao->toDateTimeLocalString(),
-            'dataEncerramentoProposta' => $instrument === CONFIG_INSTRUMENTO_ATO ? '' : $externalProcess->dat_ini_disputa->toDateTimeLocalString(),
+            'dataAberturaProposta' => $instrument === CONFIG_INSTRUMENTO_ATO ? '' : Carbon::parse($externalProcess->dat_publicacao)->format('Y-m-d\TH:i:s'),
+            'dataEncerramentoProposta' => $instrument === CONFIG_INSTRUMENTO_ATO ? '' : Carbon::parse($externalProcess->dat_ini_disputa)->format('Y-m-d\TH:i:s'),
             'tipoInstrumentoConvocatorioId' => $instrument,
             'modalidadeId' => modality($externalProcess->tipo_processo),
             'modoDisputaId' => disputeMode($externalProcess->tipo_modelo, $externalProcess->tipo_processo),
@@ -46,14 +51,13 @@ class CreateProcessInteractor implements CreateProcessInputPort
             'itemsCompra' => $preparedItems
         ]);
 
-        if ($this->repository->exists($data)) {
-            return $this->output->processAlreadyExists(new CreateProcessResponseModel($data));
-        }
+        $firstDocument = $this->documentUtils->preparePurchaseFirstDocumentImp($externalProcess);
 
         try {
+            $this->httpService->postWithDocument($data, '', $firstDocument);
             $process = $this->repository->create($data);
         } catch (\Exception $e) {
-            return $this->output->unableToCreateProcess(new CreateProcessResponseModel($process), $e);
+            return $this->output->unableToCreateProcess(new CreateProcessResponseModel($data), $e);
         }
 
         return $this->output->processCreated(

@@ -177,3 +177,19 @@ function truncate(string $string, int $width, int $start = 0, string $trim_marke
 {
     return mb_strimwidth($string, $start, $width, $trim_marker);
 }
+
+
+function getTypePurchaseDocument(Process $process): int
+{
+    $instrumentType = new Collection([
+        CONFIG_TIPO_PROCESSO_DISPENSA => CONFIG_DOCUMENTO_AVISOCONTRATACAODIRETA,
+        CONFIG_TIPO_PROCESSO_PREGAO => CONFIG_DOCUMENTO_EDITAL,
+        CONFIG_TIPO_LEILAO_ELETRONICO => CONFIG_DOCUMENTO_EDITAL,
+        CONFIG_TIPO_PROCESSO_CONCORRENCIA => CONFIG_DOCUMENTO_EDITAL,
+        CONFIG_TIPO_INEXIGIBILIDADE => CONFIG_DOCUMENTO_ATO_CONTRATACAO_DIRETA,
+        CONFIG_TIPO_COMPRA_DIRETA => CONFIG_DOCUMENTO_ATO_CONTRATACAO_DIRETA,
+        CONFIG_TIPO_PREGAO_PRESENCIAL => CONFIG_INSTRUMENTO_EDITAL
+    ]);
+
+    return $instrumentType->get($process->tipo_processo);
+}

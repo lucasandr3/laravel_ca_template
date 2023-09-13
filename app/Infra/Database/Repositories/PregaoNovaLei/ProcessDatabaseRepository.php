@@ -4,6 +4,7 @@ namespace App\Infra\Database\Repositories\PregaoNovaLei;
 
 use App\Domain\Interfaces\PregaoNovaLei\ProcessEntity;
 use App\Domain\Interfaces\PregaoNovaLei\ProcessRepository;
+use App\Models\External\Process;
 
 class ProcessDatabaseRepository implements ProcessRepository
 {
