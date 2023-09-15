@@ -2,8 +2,10 @@
 
 namespace App\Infra\Services;
 
+use GuzzleHttp\Client;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use stdClass;
 
 class HttpService
 {
@@ -15,28 +17,58 @@ class HttpService
         ])->post("{$this->params('ENDPOINT_TCE_RONDONIA')}/api/Licitacao/enviar", $data->jsonSerialize()['process']);
     }
 
-    public function postWithDocument($data, $endpoint, $document): Response
+    public function postWithDocument($data, $endpoint, $document)
     {
-        return Http::post($endpoint, [
-            'headers' => [
-                'Authorization' => 'autorizarion',
-                'Titulo-Documento' => $document['Titulo-Documento'],
-                'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
-            ],
-            'multipart' => [
-                [
-                    'name' => 'compra',
-                    'contents' => json_encode($data),
-                    'headers' => ['Content-Type' => "application/json"]
+        $authorization = $this->getAuthorizationImp();
+
+//        $client = new Client();
+//
+//           $response = $client->request('post', $endpoint, [
+//                'headers' => [
+//                    'Authorization' => $authorization->authorization,
+//                    'Titulo-Documento' => $document['Titulo-Documento'],
+//                    'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
+//                ],
+//                'multipart' => [
+//                    [
+//                        'name' => 'compra',
+//                        'contents' => $data->toJson(),
+//                        'headers' => ['Content-Type' => "application/json"]
+//                    ],
+//                    [
+//                        'name' => 'documento',
+//                        'contents' => $document['multipart'][0]['contents'],
+//                        'filename' => $document['multipart'][0]['filename'],
+//                        'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
+//                    ]
+//                ]
+//            ]);
+
+
+
+        try {
+            return Http::post($endpoint, [
+                'headers' => [
+                    'Authorization' => $authorization->authorization,
+                    'Titulo-Documento' => $document['Titulo-Documento'],
+                    'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
                 ],
-                [
-                    'name' => 'documento',
-                    'contents' => $document['multipart'][0]['contents'],
-                    'filename' => $document['multipart'][0]['filename'],
-                    'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
+                'multipart' => [
+                    [
+                        'name' => 'compra',
+                        'contents' => $data->toJson(),
+                    ],
+                    [
+                        'name' => 'documento',
+                        'contents' => $document['multipart'][0]['contents'],
+                        'filename' => $document['multipart'][0]['filename'],
+                        'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            echo "<pre>"; var_dump($e->getMessage()); echo "</pre>"; die;
+        }
     }
 
     public function get($data, string $status): void
@@ -61,5 +93,25 @@ class HttpService
             'Authorization' => "Bearer ",
             'Content-Type' => 'application/json'
         ])->delete("{$this->params('ENDPOINT_TCE_RONDONIA')}/api/Licitacao/enviar", $data->jsonSerialize()['process']);
+    }
+
+    function getAuthorizationImp(): stdClass
+    {
+        $systemParams = new SystemParams();
+        $parameters = $systemParams->getAuthParams();
+
+        $endpoint = $parameters['HOST_PNCP'] . $parameters['LINK_LOGIN_PNCP'];
+
+        $response = Http::post($endpoint, [
+            "login" => $parameters['AUTH_LOGIN'],
+            "senha" => $parameters['AUTH_PASSWORD']
+        ]);
+
+        $result = new stdClass();
+        $result->status = $response->status();
+        $result->authorization = $response->status() != STATUS_CODE_OK
+            ? json_decode($response->body())->message
+            : $response->header('authorization');
+        return $result;
     }
 }

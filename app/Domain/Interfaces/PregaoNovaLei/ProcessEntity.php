@@ -2,6 +2,8 @@
 
 namespace App\Domain\Interfaces\PregaoNovaLei;
 
+use Illuminate\Database\Eloquent\Casts\Json;
+
 interface ProcessEntity
 {
     public function getCnpj(): string;
@@ -73,4 +75,6 @@ interface ProcessEntity
     public function setItensCompra(array $itens): void;
 
     public function toJson(): string;
+
+    public function toArray(): array;
 }

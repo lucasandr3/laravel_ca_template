@@ -11,7 +11,7 @@ class DocumentUtils
     {
         $document = $process->notices()->first();
 
-        $path = config('CONFIG_API_BUCKET') . DIRECTORY_SEPARATOR . $document->caminho;
+        $path = config('document.CONFIG_API_BUCKET') . DIRECTORY_SEPARATOR . $document->caminho;
         $filename = basename($path);
         $extension = pathinfo($path, PATHINFO_EXTENSION);
 

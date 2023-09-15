@@ -3,15 +3,13 @@
 namespace App\Models\PregaoNovaLei;
 
 use App\Domain\Interfaces\PregaoNovaLei\ProcessEntity;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @method static \App\Models\PregaoNovaLei\Process create(array $attributes = [])
- */
 class Process implements ProcessEntity
 {
-    use HasFactory;
+//    use HasFactory;
 
     public function __construct(private $attributes){}
 
@@ -187,6 +185,11 @@ class Process implements ProcessEntity
 
     public function toJson(): string
     {
-        return json_encode($this->attributes, JSON_THROW_ON_ERROR);
+        return json_encode($this->attributes);
+    }
+
+    public function toArray(): array
+    {
+        return $this->attributes;
     }
 }

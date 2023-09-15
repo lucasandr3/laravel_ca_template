@@ -193,3 +193,16 @@ function getTypePurchaseDocument(Process $process): int
 
     return $instrumentType->get($process->tipo_processo);
 }
+
+function encryptParam($data, string $key): string
+{
+    $result = "";
+    for ($i = 0, $iMax = strlen($data); $i < $iMax; $i++) {
+        $char = substr($data, $i, 1);
+        $keychar = substr($key, ($i % strlen($key)) - 1, 1);
+        $char = chr(ord($char) + ord($keychar));
+        $result .= $char;
+    }
+
+    return urlencode(base64_encode($result));
+}

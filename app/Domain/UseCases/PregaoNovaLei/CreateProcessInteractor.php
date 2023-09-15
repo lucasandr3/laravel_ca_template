@@ -9,6 +9,7 @@ use App\Domain\Interfaces\PregaoNovaLei\ProcessRepository;
 use App\Domain\Interfaces\PregaoNovaLei\ViewModel;
 use App\Infra\Services\DocumentUtils;
 use App\Infra\Services\HttpService;
+use App\Infra\Services\SystemParams;
 use Illuminate\Support\Carbon;
 
 class CreateProcessInteractor implements CreateProcessInputPort
@@ -20,16 +21,25 @@ class CreateProcessInteractor implements CreateProcessInputPort
         private readonly GetDataProcess          $getDataProcess,
         private readonly GetDataItems            $getDataItems,
         private readonly HttpService             $httpService,
-        private readonly DocumentUtils           $documentUtils
-    ) {}
+        private readonly DocumentUtils           $documentUtils,
+        private readonly SystemParams            $systemParams
+    )
+    {
+    }
 
     public function createProcess(CreateProcessRequestModel $model): ViewModel
     {
+        $parameters = $this->systemParams->sendPurchaseParams();
         $externalProcess = $this->getDataProcess->getProcessById($model->getCodProcess());
         $externalItems = $this->getDataItems->getItemsByProcess($model->getCodProcess());
         $preparedItems = $this->prepareItems($externalItems);
 
         $instrument = instrument($externalProcess->tipo_processo);
+
+        $linkSistemaOrigem = sprintf(
+            $parameters['LINK_SALA_DISPUTA_VISITANTE'],
+            base64_encode(encryptParam($model->getCodProcess(), $parameters['KEY_SALA_VISITANTE']))
+        );
 
         $data = $this->factory->make([
             'cnpj' => $externalProcess->administration()->cnpj,
@@ -47,14 +57,19 @@ class CreateProcessInteractor implements CreateProcessInputPort
             'situacaoCompraId' => situationPurchase($externalProcess),
             'informacaoComplementar' => "",
             'amparoLegalId' => supportLegal($externalProcess),
-            'linkSistemaOrigem' => 'http://portal.licitanet.com',
-            'itemsCompra' => $preparedItems
+            'linkSistemaOrigem' => $linkSistemaOrigem,
+            'itensCompra' => $preparedItems
         ]);
 
         $firstDocument = $this->documentUtils->preparePurchaseFirstDocumentImp($externalProcess);
 
+        $endpoint = $parameters['HOST_PNCP'] . sprintf(
+                $parameters['LINK_POST_COMPRAS'],
+                $externalProcess->administration()->cnpj
+            );
+
         try {
-            $this->httpService->postWithDocument($data, '', $firstDocument);
+            $teste = $this->httpService->postWithDocument($data, $endpoint, $firstDocument);
             $process = $this->repository->create($data);
         } catch (\Exception $e) {
             return $this->output->unableToCreateProcess(new CreateProcessResponseModel($data), $e);
@@ -84,11 +99,11 @@ class CreateProcessInteractor implements CreateProcessInputPort
                 "unidadeMedida" => $item->unidade,
                 "valorUnitarioEstimado" => $budgetedValue,
                 "valorTotal" => $totalAmountBudgeted,
-                'itemCategoriaId' =>  returnItemCategoryId($item->process()),
+                'itemCategoriaId' => returnItemCategoryId($item->process()),
                 "situacaoCompraItemId" => getPurchaseItemSituationImp($item->batch($item->process()->id)->status()->nome),
                 "criterioJulgamentoId" => getJudgment($item->process()),
-                'orcamentoSigiloso'=> !$item->batch($item->process()->id)->bol_mostra_orcado,
-                'cod_lote'=> $item->cod_lote,
+                'orcamentoSigiloso' => !$item->batch($item->process()->id)->bol_mostra_orcado,
+                'cod_lote' => $item->cod_lote,
             ];
         }
 
