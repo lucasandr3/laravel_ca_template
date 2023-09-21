@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+    # image project
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - laravel
+
+    # nginx
+    nginx:
+        image: nginx:alpine
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+        networks:
+            - laravel
+
+    # db mysql
+    mysql:
+        image: mysql:8.0.29-debian
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        volumes:
+            - MYSQL_VOLUME_EXEMPLO=/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: "98096941"
+            MYSQL_DATABASE: "pncp"
+        networks:
+            - laravel
+        ports:
+            - "3307:3306"
+
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    MYSQL_VOLUME_EXEMPLO:
+        driver: local
