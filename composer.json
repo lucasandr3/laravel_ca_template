@@ -34,7 +34,7 @@
         "psr-4": {
             "Tests\\": "tests/"
         },
-        "files": ["helpers/constants.php", "helpers/functions.php"]
+        "files": ["helpers/constants.php", "helpers/functions.php", "helpers/layouts.php"]
     },
     "scripts": {
         "post-autoload-dump": [

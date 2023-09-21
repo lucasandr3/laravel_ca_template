@@ -9,9 +9,7 @@ use App\Http\Requests\PregaoNovaLei\CreatePregaoNovaLeiRequest;
 
 class CreatePregaoNovaLeiController extends Controller
 {
-    public function __construct(
-        private CreateProcessInteractor $interactor
-    ) {}
+    public function __construct(private CreateProcessInteractor $interactor) {}
 
     public function __invoke(CreatePregaoNovaLeiRequest $request, $codProcess)
     {

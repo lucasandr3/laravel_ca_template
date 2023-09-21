@@ -17,9 +17,13 @@ class HttpService
         ])->post("{$this->params('ENDPOINT_TCE_RONDONIA')}/api/Licitacao/enviar", $data->jsonSerialize()['process']);
     }
 
-    public function postWithDocument($data, $endpoint, $document)
+    public function postWithDocument($data, $parameters, $document)
     {
         $authorization = $this->getAuthorizationImp();
+        $endpoint = $parameters['HOST_PNCP'] . sprintf(
+                $parameters['LINK_POST_COMPRAS'],
+                $data->getCnpj()
+            );
 
 //        $client = new Client();
 //
