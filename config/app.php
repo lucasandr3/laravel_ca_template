@@ -169,6 +169,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Bschmitt\Amqp\AmqpServiceProvider::class,
+
+        /*
+         * Domain Providers
+         */
+        App\Providers\Dispensa\DispensaProvider::class
     ])->toArray(),
 
     /*

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Infra\Database\Repositories\External\Items;
+namespace App\Infra\Services;
 
-use App\Domain\Interfaces\Pregao\GetDataItems;
 use App\Models\External\Item;
+use App\Shared\Interfaces\GetItemsProcess;
 
-class ExternalItems implements GetDataItems
+class ItemService implements GetItemsProcess
 {
     public function getItemsByProcess(int $codProcess)
     {

@@ -5,6 +5,7 @@ namespace App\Models\External;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Process extends Model
 {
@@ -21,5 +22,10 @@ class Process extends Model
     public function notices(): Collection
     {
         return $this->hasMany(Notice::class, 'cod_pregao')->getResults();
+    }
+
+    public function processSupportLegal(): HasMany
+    {
+        return $this->hasMany(ProcessSupportLegal::class, 'cod_pregao');
     }
 }

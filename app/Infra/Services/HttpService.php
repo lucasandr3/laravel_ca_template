@@ -25,54 +25,26 @@ class HttpService
                 $data->getCnpj()
             );
 
-//        $client = new Client();
-//
-//           $response = $client->request('post', $endpoint, [
-//                'headers' => [
-//                    'Authorization' => $authorization->authorization,
-//                    'Titulo-Documento' => $document['Titulo-Documento'],
-//                    'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
-//                ],
-//                'multipart' => [
-//                    [
-//                        'name' => 'compra',
-//                        'contents' => $data->toJson(),
-//                        'headers' => ['Content-Type' => "application/json"]
-//                    ],
-//                    [
-//                        'name' => 'documento',
-//                        'contents' => $document['multipart'][0]['contents'],
-//                        'filename' => $document['multipart'][0]['filename'],
-//                        'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
-//                    ]
-//                ]
-//            ]);
-
-
-
-        try {
-            return Http::post($endpoint, [
-                'headers' => [
-                    'Authorization' => $authorization->authorization,
-                    'Titulo-Documento' => $document['Titulo-Documento'],
-                    'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
+        $response = (new Client())->request('post', $endpoint, [
+            'headers' => [
+                'Authorization' => $authorization->authorization,
+                'Titulo-Documento' => $document['Titulo-Documento'],
+                'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
+            ],
+            'multipart' => [
+                [
+                    'name' => 'compra',
+                    'contents' => $data->toJson(),
+                    'headers' => ['Content-Type' => "application/json"]
                 ],
-                'multipart' => [
-                    [
-                        'name' => 'compra',
-                        'contents' => $data->toJson(),
-                    ],
-                    [
-                        'name' => 'documento',
-                        'contents' => $document['multipart'][0]['contents'],
-                        'filename' => $document['multipart'][0]['filename'],
-                        'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
-                    ]
+                [
+                    'name' => 'documento',
+                    'contents' => $document['multipart'][0]['contents'],
+                    'filename' => $document['multipart'][0]['filename'],
+                    'headers' => ['Content-Type' => "multipart/form-data; boundary=-----44cf242ea3173cfa0b97f80c68608c4c'"]
                 ]
-            ]);
-        } catch (\Exception $e) {
-            echo "<pre>"; var_dump($e->getMessage()); echo "</pre>"; die;
-        }
+            ]
+        ]);
     }
 
     public function get($data, string $status): void
@@ -91,12 +63,19 @@ class HttpService
         ])->put("{$this->params('ENDPOINT_TCE_RONDONIA')}/api/Licitacao/enviar", $data->jsonSerialize()['process']);
     }
 
-    public function delete($data, string $status): void
+    public function delete($purchase, array $parameters, string $reason = null): void
     {
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer ",
-            'Content-Type' => 'application/json'
-        ])->delete("{$this->params('ENDPOINT_TCE_RONDONIA')}/api/Licitacao/enviar", $data->jsonSerialize()['process']);
+        $authorization = $this->getAuthorizationImp();
+        $endpoint = $parameters['HOST_PNCP'] . sprintf($parameters['LINK_DELETE_COMPRA'],
+                $purchase->cnpj_entidade,
+                $purchase->ano,
+                $purchase->sequencial
+            );
+
+        $response = (new Client())->request('DELETE', $endpoint, [
+            'headers' => ['Authorization' => $authorization->authorization],
+            'json' => ['justificativa' => $reason]
+        ]);
     }
 
     function getAuthorizationImp(): stdClass

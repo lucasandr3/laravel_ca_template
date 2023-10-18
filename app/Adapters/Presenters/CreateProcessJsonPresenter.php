@@ -3,12 +3,12 @@
 namespace App\Adapters\Presenters;
 
 use App\Adapters\ViewModels\JsonResourceViewModel;
-use App\Domain\Interfaces\PregaoNovaLei\ViewModel;
-use App\Domain\UseCases\PregaoNovaLei\CreateProcessOutputPort;
-use App\Domain\UseCases\PregaoNovaLei\CreateProcessResponseModel;
-use App\Http\Resources\PregaoNovaLei\ProcessAlreadyExistsResource;
-use App\Http\Resources\PregaoNovaLei\ProcessCreatedResource;
-use App\Http\Resources\PregaoNovaLei\UnableToCreateProcessResource;
+use App\Domain\Interfaces\Pregao\ViewModel;
+use App\Domain\UseCases\Pregao\CreateProcessOutputPort;
+use App\Domain\UseCases\Pregao\CreateProcessResponseModel;
+use App\Http\Resources\Pregao\ProcessAlreadyExistsResource;
+use App\Http\Resources\Pregao\ProcessCreatedResource;
+use App\Http\Resources\Pregao\UnableToCreateProcessResource;
 
 class CreateProcessJsonPresenter implements CreateProcessOutputPort
 {
@@ -19,11 +19,12 @@ class CreateProcessJsonPresenter implements CreateProcessOutputPort
         );
     }
 
-    public function processAlreadyExists(CreateProcessResponseModel $model): ViewModel
+    public function processAlreadyExists(array $error): ViewModel
     {
-        return new JsonResourceViewModel(
-            new ProcessAlreadyExistsResource($model->getProcess())
-        );
+        echo "<pre>"; var_dump($error); echo "</pre>"; die;
+//        return new JsonResourceViewModel(
+//            new ProcessAlreadyExistsResource($model->getProcess())
+//        );
     }
 
     public function unableToCreateProcess(CreateProcessResponseModel $model, \Throwable $e): ViewModel
@@ -36,5 +37,15 @@ class CreateProcessJsonPresenter implements CreateProcessOutputPort
         return new JsonResourceViewModel(
             new UnableToCreateProcessResource($e)
         );
+    }
+
+    public function deletedProcess(array $responde)
+    {
+        // TODO: Implement deletedProcess() method.
+    }
+
+    public function unableToDeletedProcess(array $response, \Throwable $e): array
+    {
+        // TODO: Implement unableToDeletedProcess() method.
     }
 }

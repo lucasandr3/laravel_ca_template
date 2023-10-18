@@ -172,3 +172,8 @@ const CONFIG_DOCUMENTO_DOD = 10;
 const STATUS_CODE_OK = 200;
 const STATUS_CODE_CREATED = 201;
 const STATUS_CODE_NOT_FOUND = 404;
+
+
+/** Reasons */
+const REASON_DEFAULT_REMOVE_PURCHASE = 'Compra enviada erroneamente.';
+const REASON_DEFAULT_REMOVE_FILE = 'Arquivo incorreto enviado anteriormente.';

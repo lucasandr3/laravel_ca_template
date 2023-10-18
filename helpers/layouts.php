@@ -26,9 +26,9 @@ function prepareDataPregaoNovaLei(Process $externalProcess, $externalItems, arra
         'tipoInstrumentoConvocatorioId' => $instrument,
         'modalidadeId' => modality($externalProcess->tipo_processo),
         'modoDisputaId' => disputeMode($externalProcess->tipo_modelo, $externalProcess->tipo_processo),
-        'situacaoCompraId' => situationPurchase($externalProcess),
+        'situacaoCompraId' => situationPurchase($externalProcess->toArray()),
         'informacaoComplementar' => "",
-        'amparoLegalId' => supportLegal($externalProcess),
+        'amparoLegalId' => supportLegal($externalProcess->toArray()),
         'linkSistemaOrigem' => $linkSistemaOrigem,
         'itensCompra' => prepareItens($externalItems)
     ];

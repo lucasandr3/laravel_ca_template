@@ -2,11 +2,12 @@
 
 namespace App\Infra\Database\Repositories\External\Process;
 
-use App\Domain\Interfaces\PregaoNovaLei\GetDataProcess;
+use App\Domain\Interfaces\Dispensa\GetDataDispensa;
+use App\Domain\Interfaces\Pregao\GetDataProcess;
 use App\Models\External\Administration;
 use App\Models\External\Process;
 
-class ExternalProcess implements GetDataProcess
+class ExternalProcess implements GetDataProcess, GetDataDispensa
 {
     public function getProcessById(int $codProcess)
     {
