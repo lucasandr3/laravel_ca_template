@@ -2,7 +2,7 @@
 
 namespace App\Adapters\ViewModels;
 
-use App\Domain\Interfaces\Pregao\ViewModel;
+use App\Domain\Interfaces\PregaoEletronico\ViewModel;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class JsonResourceModel implements ViewModel

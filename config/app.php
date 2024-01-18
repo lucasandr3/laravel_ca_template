@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Sao_Paulo',
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'pt_BR',
 
     /*
     |--------------------------------------------------------------------------
@@ -173,7 +173,9 @@ return [
         /*
          * Domain Providers
          */
-        App\Providers\Dispensa\DispensaProvider::class
+        App\Providers\Dispensa\DispensaProvider::class,
+        App\Providers\Orgao\OrgaoProvider::class,
+        App\Providers\Unidade\UnidadeProvider::class,
     ])->toArray(),
 
     /*

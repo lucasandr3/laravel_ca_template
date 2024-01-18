@@ -3,12 +3,12 @@
 namespace App\Adapters\Presenters;
 
 use App\Adapters\ViewModels\JsonResourceViewModel;
-use App\Domain\Interfaces\Pregao\ViewModel;
-use App\Domain\UseCases\Pregao\CreateProcessOutputPort;
-use App\Domain\UseCases\Pregao\CreateProcessResponseModel;
-use App\Http\Resources\Pregao\ProcessAlreadyExistsResource;
-use App\Http\Resources\Pregao\ProcessCreatedResource;
-use App\Http\Resources\Pregao\UnableToCreateProcessResource;
+use App\Domain\Interfaces\PregaoEletronico\ViewModel;
+use App\Domain\UseCases\PregaoEletronico\CreateProcessOutputPort;
+use App\Domain\UseCases\PregaoEletronico\CreateProcessResponseModel;
+use App\Http\Resources\PregaoEletronico\ProcessAlreadyExistsResource;
+use App\Http\Resources\PregaoEletronico\ProcessCreatedResource;
+use App\Http\Resources\PregaoEletronico\UnableToCreateProcessResource;
 
 class CreateProcessJsonPresenter implements CreateProcessOutputPort
 {

@@ -4,9 +4,9 @@ namespace App\Factories\Dispensa;
 
 use App\Domain\Interfaces\Dispensa\DispensaEntity;
 use App\Domain\Interfaces\Dispensa\DispensaFactoryInterface;
-use App\Domain\Interfaces\Pregao\ProcessEntity;
-use App\Domain\Interfaces\Pregao\ProcessFactory;
-use App\Factories\Pregao\ItemModelFactory;
+use App\Domain\Interfaces\PregaoEletronico\ProcessEntity;
+use App\Domain\Interfaces\PregaoEletronico\ProcessFactory;
+use App\Factories\PregaoEletronico\ItemModelFactory;
 use App\Models\Dispensa\Process;
 use App\Shared\ValueObjects\AmparoLegalValueObject;
 use App\Shared\ValueObjects\DataAberturaPropostaValueObject;

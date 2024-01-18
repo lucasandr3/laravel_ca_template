@@ -3,7 +3,7 @@
 namespace App\Models\Dispensa;
 
 use App\Domain\Interfaces\Dispensa\DispensaEntity;
-use App\Domain\Interfaces\Pregao\ProcessEntity;
+use App\Domain\Interfaces\PregaoEletronico\ProcessEntity;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\JsonEncodingException;
@@ -211,5 +211,30 @@ class Process implements DispensaEntity
             'linkSistemaOrigem' => $this->getLinkSistemaOrigem(),
             'itensCompra' => $this->getItensCompra()
         ];
+    }
+
+    public function toObject(): \stdClass
+    {
+        $process = new \stdClass();
+
+        $process->cnpj = $this->getCnpj();
+        $process->codigoUnidadeCompradora = $this->getCodigoUnidadeCompradora();
+        $process->objetoCompra = $this->getObjetoCompra();
+        $process->anoCompra = $this->getAnoCompra();
+        $process->srp = $this->getSrp();
+        $process->numeroCompra = $this->getNumeroCompra();
+        $process->numeroProcesso = $this->getNumeroProcesso();
+        $process->dataAberturaProposta = $this->getDataAberturaProposta();
+        $process->dataEncerramentoProposta = $this->getDataEncerramentoProposta();
+        $process->tipoInstrumentoConvocatorioId = $this->getTipoInstrumentoConvocatorioId();
+        $process->modalidadeId = $this->getModalidadeId();
+        $process->modoDisputaId = $this->getModoDisputaId();
+        $process->situacaoCompraId = $this->getSituacaoCompraId();
+        $process->informacaoComplementar = $this->getInformacaoComplementar();
+        $process->amparoLegalId = $this->getAmparoLegalId();
+        $process->linkSistemaOrigem = $this->getLinkSistemaOrigem();
+        $process->itensCompra = $this->getItensCompra();
+
+        return $process;
     }
 }

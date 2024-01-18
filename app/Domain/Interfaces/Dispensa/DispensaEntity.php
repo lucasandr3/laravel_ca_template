@@ -77,4 +77,6 @@ interface DispensaEntity
     public function toJson(): string;
 
     public function toArray(): array;
+
+    public function toObject(): \stdClass;
 }

@@ -7,9 +7,11 @@ use App\Domain\Interfaces\Dispensa\DispensaRepositoryInterface;
 use App\Domain\Interfaces\Dispensa\GetDataDispensa;
 use App\Infra\Services\DocumentUtils;
 use App\Infra\Services\HttpService;
+use App\Infra\Services\LogService;
 use App\Infra\Services\SystemParams;
 use App\Shared\Interfaces\GetDataProcess;
 use App\Shared\Interfaces\GetItemsProcess;
+use App\Shared\Interfaces\ProcessToDatabaseFactory;
 
 class DispensaInteractor implements CreateDispensa
 {
@@ -21,7 +23,8 @@ class DispensaInteractor implements CreateDispensa
         private readonly GetItemsProcess             $getItemsProcess,
         private readonly HttpService                 $httpService,
         private readonly DocumentUtils               $documentUtils,
-        private readonly SystemParams                $systemParams
+        private readonly SystemParams                $systemParams,
+        private readonly ProcessToDatabaseFactory    $processToDatabase
     )
     {
     }
@@ -42,10 +45,12 @@ class DispensaInteractor implements CreateDispensa
         $firstDocument = $this->documentUtils->preparePurchaseFirstDocumentImp($externalProcess);
 
         try {
-            $this->httpService->postWithDocument($processData, $parameters, $firstDocument);
+            $response = $this->httpService->postWithDocument($processData, $parameters, $firstDocument);
+            $processToDatabase = $this->processToDatabase->make($processData->toArray(), $response);
             $process = $this->repository->create($processData);
-        } catch (\Exception $e) {
-            return $this->output->unableToCreateProcess(new DispensaResponseModel($processData), $e);
+        } catch (\Exception $exception) {
+            LogService::saveLogProcess($processData, $exception);
+            return $this->output->unableToCreateProcess(new DispensaResponseModel($processData), $exception);
         }
 
         return $this->output->processCreated(

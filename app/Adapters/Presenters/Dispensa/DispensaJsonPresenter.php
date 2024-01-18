@@ -3,7 +3,7 @@
 namespace App\Adapters\Presenters\Dispensa;
 
 use App\Adapters\ViewModels\JsonResourceModel;
-use App\Domain\Interfaces\Pregao\ViewModel;
+use App\Domain\Interfaces\PregaoEletronico\ViewModel;
 use App\Domain\UseCases\Dispensa\DispensaResponseModel;
 use App\Domain\UseCases\Dispensa\OutputPort;
 

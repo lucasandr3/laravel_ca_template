@@ -4,7 +4,7 @@ namespace App\Repositories\Dispensa;
 
 use App\Domain\Interfaces\Dispensa\DispensaEntity;
 use App\Domain\Interfaces\Dispensa\DispensaRepositoryInterface;
-use App\Models\Pregao\Process;
+use App\Models\PregaoEletronico\Process;
 
 class DispensaRepository implements DispensaRepositoryInterface
 {

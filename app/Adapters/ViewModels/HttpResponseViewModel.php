@@ -2,7 +2,7 @@
 
 namespace App\Adapters\ViewModels;
 
-use App\Domain\Interfaces\Pregao\ViewModel;
+use App\Domain\Interfaces\PregaoEletronico\ViewModel;
 use Illuminate\Http\Response as LaravelResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
