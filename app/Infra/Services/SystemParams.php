@@ -82,6 +82,14 @@ class SystemParams
         return sprintf($parameters['HOST_PNCP'] . $parameters['LINK_POST_UNIDADES'], $cnpjOrgao);
     }
 
+    public function contratoParams(int|null|string $cnpjOrgao = null)
+    {
+        $resources = ['LINK_POST_CONTRATO'];
+        $parameters = $this->prepareParams($resources);
+
+        return sprintf($parameters['HOST_PNCP'] . $parameters['LINK_POST_CONTRATO'], $cnpjOrgao);
+    }
+
     public function getAuthParams(): array
     {
         $array = [];

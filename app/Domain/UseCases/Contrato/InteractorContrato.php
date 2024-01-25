@@ -1,39 +1,35 @@
 <?php
 
-namespace App\Domain\UseCases\Unidade;
+namespace App\Domain\UseCases\Contrato;
 
+use App\Domain\Interfaces\Contrato\ContratoRepositoryInterface;
 use App\Domain\Interfaces\Unidade\UnidadeRepositoryInterface;
+use App\Events\Contrato\ContratoErrorEvent;
+use App\Events\Contrato\ContratoSuccessEvent;
 use App\Infra\Services\HttpService;
 use App\Infra\Services\SystemParams;
 use JsonException;
 
-class InteractorUnidade
+class InteractorContrato
 {
     public function __construct
     (
-        private readonly UnidadeRepositoryInterface $unidadeRepositoryExternal,
+        private readonly ContratoRepositoryInterface $repository,
         private readonly SystemParams $systemParams,
         private readonly HttpService $httpService,
-        private readonly UnidadeOutput $output,
+        private readonly ContratoOutput $output
     )
     {}
 
     /**
      * @throws JsonException
      */
-    public function createUnidade(InputRequestUnidade $input)
+    public function saveContract(InputRequestContrato $input)
     {
-        $unidadeExterna = $this->unidadeRepositoryExternal->getUnidade($input->getCodigoUnidade());
-        $unidadeCadastrada = $this->unidadeCadastrada($unidadeExterna->cnpj, $input->getCodigoUnidade());
-
-        if ($unidadeCadastrada) {
-            return $this->output->unidade($unidadeCadastrada);
-        }
-
-        $parameters = $this->systemParams->unidadeParams(cnpjOrgao: $unidadeExterna->cnpj);
+        $parameters = $this->systemParams->contratoParams(cnpjOrgao: $input->getCnpjCompra());
 
         $data = array_merge([
-            'body' => $input->getDadosUnidade(),
+            'body' => $input->getContrato(),
             'endpoint' => $parameters
         ]);
 
@@ -43,12 +39,15 @@ class InteractorUnidade
             return $this->output->unableCreate($result?->getBody()->getContents());
         }
 
-        return $this->output->unidade(json_encode(['message' => 'Unidade cadastrada com sucesso.'], JSON_THROW_ON_ERROR));
+        event(new ContratoSuccessEvent($this->output->contrato($result?->getBody()->getContents())));
+        return $this->output->contrato(json_encode(['message' => 'contrato cadastrado com sucesso.'], JSON_THROW_ON_ERROR));
     }
 
-    public function getUnidades(InputRequestUnidade $input)
+    public function sendDocumentContrato(InputRequestContratoArquivo $input)
     {
-        $parameters = $this->systemParams->unidadeParams(cnpjOrgao: $input->getDocumento());
+        $contrato = $this->repository->getContrato($input->getCodContrato(), $input->getCodProcesso());
+        echo "<pre>"; var_dump($contrato); echo "</pre>"; die;
+        $parameters = $this->systemParams->contratoParams();
         $result = $this->httpService->get($parameters)?->getBody()->getContents();
         return $this->output->todasUnidades($result);
     }

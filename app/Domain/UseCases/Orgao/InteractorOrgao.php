@@ -32,17 +32,17 @@ class InteractorOrgao
 
         $result = $this->httpService->post($data, true);
 
-        if ($result->getStatusCode() !== STATUS_CODE_CREATED) {
-            return $this->output->unableCreate($result->getBody()->getContents());
+        if ($result?->getStatusCode() !== STATUS_CODE_CREATED) {
+            return $this->output->unableCreate($result?->getBody()->getContents());
         }
 
-        return $this->output->organ($result->getBody()->getContents());
+        return $this->output->organ($result?->getBody()->getContents());
     }
 
     public function getOrgaos(array $filtro)
     {
         $parameters = $this->systemParams->orgaoParams(filtro: $filtro);
-        $result = $this->httpService->get($parameters)->getBody()->getContents();
+        $result = $this->httpService->get($parameters)?->getBody()->getContents();
         return $this->output->allOrgans($result);
     }
 
@@ -51,11 +51,11 @@ class InteractorOrgao
         $parameters = $this->systemParams->orgaoParams($input->getDocumento());
         $result = $this->httpService->get($parameters);
 
-        if ($result->getStatusCode() === STATUS_CODE_NOT_FOUND) {
-            return $this->output->notFoundResource($result->getBody()->getContents());
+        if ($result?->getStatusCode() === STATUS_CODE_NOT_FOUND) {
+            return $this->output->notFoundResource($result?->getBody()->getContents());
         }
 
-        return $this->output->organ($result->getBody()->getContents());
+        return $this->output->organ($result?->getBody()->getContents());
     }
 
     public function getOrgaoPorCodigo(InputRequestOrgao $input)
@@ -63,11 +63,11 @@ class InteractorOrgao
         $parameters = $this->systemParams->orgaoParams($input->getCodigoOrgao());
         $result = $this->httpService->get($parameters);
 
-        if ($result->getStatusCode() === STATUS_CODE_NOT_FOUND) {
-            return $this->output->notFoundResource($result->getBody()->getContents());
+        if ($result?->getStatusCode() === STATUS_CODE_NOT_FOUND) {
+            return $this->output->notFoundResource($result?->getBody()->getContents());
         }
 
-        return $this->output->organ($result->getBody()->getContents());
+        return $this->output->organ($result?->getBody()->getContents());
     }
 
     public function updateOrgao(InputRequestOrgao $input)
@@ -81,11 +81,11 @@ class InteractorOrgao
 
         $result = $this->httpService->put($data);
 
-        if ($result->getStatusCode() === STATUS_CODE_NOT_FOUND) {
-            return $this->output->unableUpdated($result->getBody()->getContents());
+        if ($result?->getStatusCode() === STATUS_CODE_NOT_FOUND) {
+            return $this->output->unableUpdated($result?->getBody()->getContents());
         }
 
-        return $this->output->organ($result->getBody()->getContents());
+        return $this->output->organ($result?->getBody()->getContents());
     }
 
     private function orgaoCadastrado(string $documento): bool|string
@@ -93,10 +93,10 @@ class InteractorOrgao
         $parameters = $this->systemParams->orgaoParams($documento);
         $result = $this->httpService->get($parameters);
 
-        if ($result->getStatusCode() === STATUS_CODE_NOT_FOUND) {
+        if ($result?->getStatusCode() === STATUS_CODE_NOT_FOUND) {
             return false;
         }
 
-        return $result->getBody()->getContents();
+        return $result?->getBody()->getContents();
     }
 }

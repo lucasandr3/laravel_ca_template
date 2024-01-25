@@ -176,6 +176,7 @@ return [
         App\Providers\Dispensa\DispensaProvider::class,
         App\Providers\Orgao\OrgaoProvider::class,
         App\Providers\Unidade\UnidadeProvider::class,
+        App\Providers\Contrato\ContratoProvider::class
     ])->toArray(),
 
     /*
