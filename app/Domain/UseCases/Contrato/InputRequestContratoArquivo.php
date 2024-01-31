@@ -21,16 +21,16 @@ class InputRequestContratoArquivo
         return $this->attributes['processo'];
     }
 
-    public function getCodContrato(): int
+    public function getSequencialContrato(): int
     {
-        return $this->attributes['contrato'];
+        return $this->attributes['sequencialContrato'];
     }
 
     public function getDados(): array
     {
         return [
             'codProcesso' => $this->getCodProcesso(),
-            'codContrato' => $this->getCodContrato(),
+            'sequencialContrato' => $this->getSequencialContrato(),
         ];
     }
 }

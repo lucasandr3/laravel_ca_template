@@ -211,4 +211,24 @@ class Process implements ProcessEntity
             'itensCompra' => $this->getItensCompra()
         ];
     }
+
+    public function getDadosAtualizacao(): array
+    {
+        return [
+            'tipoInstrumentoConvocatorioId' => $this->getTipoInstrumentoConvocatorioId(),
+            'codigoUnidadeCompradora' => $this->getCodigoUnidadeCompradora(),
+            'modalidadeId' => $this->getModalidadeId(),
+            'modoDisputaId' => $this->getModoDisputaId(),
+            'numeroCompra' => $this->getNumeroCompra(),
+            'numeroProcesso' => $this->getNumeroProcesso(),
+            'situacaoCompraId' => $this->getSituacaoCompraId(),
+            'objetoCompra' => $this->getObjetoCompra(),
+            'informacaoComplementar' => $this->getInformacaoComplementar(),
+            'srp' => $this->getSrp(),
+            'dataAberturaProposta' => $this->getDataAberturaProposta(),
+            'dataEncerramentoProposta' => $this->getDataEncerramentoProposta(),
+            'amparoLegalId' => $this->getAmparoLegalId(),
+            'linkSistemaOrigem' => $this->getLinkSistemaOrigem(),
+        ];
+    }
 }

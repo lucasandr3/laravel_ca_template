@@ -11,7 +11,7 @@ Route::prefix('contrato')->controller(ContratoController::class)->group(function
     Route::get('compra/contrato/{processId:[0-9]+}', 'getContractByProcess');
     Route::get('compra/contrato/{processId:[0-9]+}/fornecedor/{fornecedor:[0-9]+}', 'getContractByProcessAndVendor');
     Route::get('compra/historico/{processId:[0-9]+}/contrato/{contrato:[0-9]+}', 'historyContract');
-    Route::delete('excluir', 'delContract');
+    Route::delete('', 'delContract');
 
     Route::post('arquivos', 'sendDocumentContract');
     Route::get('arquivos/{processId:[0-9]+}/contrato/{contrato:[0-9]+}', 'allDocumentsContract');

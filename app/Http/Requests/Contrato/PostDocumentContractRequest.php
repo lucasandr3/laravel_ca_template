@@ -23,7 +23,7 @@ class PostDocumentContractRequest extends FormRequest
     {
         return [
             'processo' => 'required',
-            'contrato' => 'required'
+            'sequencialContrato' => 'required'
         ];
     }
 
@@ -31,7 +31,7 @@ class PostDocumentContractRequest extends FormRequest
     {
         return [
             'processo.required' => 'Informe o código do processo',
-            'contrato.required' => 'Informe o sequencial do contrato',
+            'sequencialContrato.required' => 'Informe o sequencial do contrato',
         ];
     }
 }

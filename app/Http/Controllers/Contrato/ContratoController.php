@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Contrato;
 use App\Domain\UseCases\Contrato\InputRequestContrato;
 use App\Domain\UseCases\Contrato\InputRequestContratoArquivo;
 use App\Domain\UseCases\Contrato\InteractorContrato;
+use App\Events\TestEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contrato\CreateContractRequest;
+use App\Http\Requests\Contrato\DeleteContractRequest;
 use App\Http\Requests\Contrato\PostDocumentContractRequest;
 use Illuminate\Http\Request;
 
@@ -40,9 +42,9 @@ class ContratoController extends Controller
 
     }
 
-    public function delContract()
+    public function delContract(DeleteContractRequest $request)
     {
-
+        return $this->interactorContrato->delContract(new InputRequestContrato($request->all()));
     }
 
     public function sendDocumentContract(PostDocumentContractRequest $request)

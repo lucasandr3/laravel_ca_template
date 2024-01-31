@@ -141,6 +141,21 @@ class InputRequestContrato
         return (new MoneValueObject($this->attributes['data']['valorParcela']))->getValue();
     }
 
+    public function getCodProcesso(): int
+    {
+        return $this->attributes['processo'];
+    }
+
+    public function getSequencialContrato(): int
+    {
+        return $this->attributes['sequencialContrato'];
+    }
+
+    public function getJustificativa(): string
+    {
+        return $this->attributes['justificativa'];
+    }
+
     public function getContrato(): array
     {
         return [

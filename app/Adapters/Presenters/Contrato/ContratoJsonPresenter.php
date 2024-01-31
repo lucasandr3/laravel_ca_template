@@ -12,9 +12,14 @@ class ContratoJsonPresenter implements ContratoOutput
         return response()->json($this->prepareOutput($contrato));
     }
 
-    public function notFoundResource(string $result): JsonResponse
+    public function deleted(): JsonResponse
     {
-        return response()->json($this->prepareOutput($result));
+        return response()->json(json_encode(['message' => 'Contrato excluído com sucesso.'], JSON_THROW_ON_ERROR));
+    }
+
+    public function notFoundResource(): JsonResponse
+    {
+        return response()->json(json_encode(['message' => 'Contrato não encontrado.'], JSON_THROW_ON_ERROR));
     }
 
     public function unableCreate(string $result): JsonResponse
@@ -23,6 +28,11 @@ class ContratoJsonPresenter implements ContratoOutput
     }
 
     public function unableUpdated(string $result)
+    {
+        return response()->json($this->prepareOutput($result));
+    }
+
+    public function unableDeleted(string $result)
     {
         return response()->json($this->prepareOutput($result));
     }

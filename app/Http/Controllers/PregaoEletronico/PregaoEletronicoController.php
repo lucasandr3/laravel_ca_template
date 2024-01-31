@@ -13,29 +13,23 @@ class PregaoEletronicoController extends Controller
 {
     public function __construct(private CreateProcessInteractor $interactor) {}
 
+    public function read($codProcess)
+    {
+        return $this->interactor->getProcess(new InputRequest([], $codProcess));
+    }
+
     public function create(CreatePregaoEletronicoRequest $request, $codProcess)
     {
-        $viewModel = $this->interactor->createProcess(
-            new InputRequest([], $codProcess)
-        );
+        return $this->interactor->createProcess(new InputRequest([], $codProcess));
+    }
 
-        if ($viewModel instanceof JsonResourceViewModel) {
-            return $viewModel->getResource();
-        }
-
-        return null;
+    public function update($codProcesso)
+    {
+        return $this->interactor->updateProcesso(new InputRequest([], $codProcesso));
     }
 
     public function delete(DeletePregaoEletronicoRequest $request, $codProcess)
     {
-        $response = $this->interactor->deleteProcess(
-            new InputRequest($request->all(), $codProcess)
-        );
-
-        if ($response instanceof JsonResourceViewModel) {
-            return $response->getResource();
-        }
-
-        return null;
+        return $this->interactor->deleteProcess(new InputRequest($request->all(), $codProcess));
     }
 }

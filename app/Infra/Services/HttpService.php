@@ -70,6 +70,32 @@ class HttpService
         return $reponse;
     }
 
+    public function postDocument($document, $parameters): bool|ResponseInterface
+    {
+        $authorization = $this->getAuthorizationImp();
+
+        try {
+            $reponse = (new Client())->request('POST', $parameters, [
+                'headers' => [
+                    'Authorization' => $authorization->authorization,
+                    'Titulo-Documento' => $document['Titulo-Documento'],
+                    'Tipo-Documento-Id' => $document['Tipo-Documento-Id'],
+                ],
+                'multipart' => [
+                    [
+                        'name' => 'arquivo',
+                        'contents' => $document['multipart'][0]['contents'],
+                        'filename' => $document['multipart'][0]['filename'],
+                    ]
+                ]
+            ]);
+        } catch (RequestException $requestException) {
+            return $requestException->getResponse();
+        }
+
+        return $reponse;
+    }
+
     public function get($data)
     {
         $authorization = $this->getAuthorizationImp();
@@ -105,19 +131,22 @@ class HttpService
         return $response;
     }
 
-    public function delete($purchase, array $parameters, string $reason = null): void
+    public function delete($data, string $reason = null)
     {
         $authorization = $this->getAuthorizationImp();
-        $endpoint = $parameters['HOST_PNCP'] . sprintf($parameters['LINK_DELETE_COMPRA'],
-                $purchase->cnpj_entidade,
-                $purchase->ano,
-                $purchase->sequencial
-            );
 
-        $response = (new Client())->request('DELETE', $endpoint, [
-            'headers' => ['Authorization' => $authorization->authorization],
-            'json' => ['justificativa' => $reason]
-        ]);
+        try {
+
+            $response = (new Client())->request('DELETE', $data, [
+                'headers' => ['Authorization' => $authorization->authorization],
+                'json' => ['justificativa' => $reason]
+            ]);
+
+        } catch (RequestException $requestException) {
+            return $requestException->getResponse();
+        }
+
+        return $response;
     }
 
     private function getAuthorizationImp(): stdClass

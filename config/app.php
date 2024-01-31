@@ -167,6 +167,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Bschmitt\Amqp\AmqpServiceProvider::class,
 
@@ -176,7 +177,8 @@ return [
         App\Providers\Dispensa\DispensaProvider::class,
         App\Providers\Orgao\OrgaoProvider::class,
         App\Providers\Unidade\UnidadeProvider::class,
-        App\Providers\Contrato\ContratoProvider::class
+        App\Providers\Contrato\ContratoProvider::class,
+        App\Providers\Arquivo\ArquivoProvider::class
     ])->toArray(),
 
     /*

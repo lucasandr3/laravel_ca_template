@@ -2,11 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Events\Contrato\ContratoSuccessEvent;
+use App\Events\TestEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
-class SalvaContrato implements ShouldQueue
+class TestEventListener implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -19,8 +20,9 @@ class SalvaContrato implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(ContratoSuccessEvent $event): void
+    public function handle(TestEvent $event): void
     {
-        $contrato = $event->contrato;
+        Log::emergency('TestEvent handled successfully!');
+        info($event->message);
     }
 }

@@ -81,7 +81,9 @@ class ProcessModelFactory implements ProcessFactory
             );
         }
 
-        $newAttributes['itemsCompra'] = (new ItemModelFactory)->make($attributes['items'])->getItems();
+        if (isset($attributes['items'])) {
+            $newAttributes['itemsCompra'] = (new ItemModelFactory)->make($attributes['items'])->getItems();
+        }
 
         return new Process($newAttributes);
     }

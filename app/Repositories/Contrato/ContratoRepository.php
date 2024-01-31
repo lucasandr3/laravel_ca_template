@@ -36,4 +36,14 @@ class ContratoRepository implements ContratoRepositoryInterface
             ->where('sequencial_contrato', $codigoContrato)
         ->first();
     }
+
+    public function salvaContrato(array $contrato)
+    {
+        Contract::query()->insert($contrato);
+    }
+
+    public function deletaContrato(int $codContrato)
+    {
+        Contract::query()->find($codContrato)?->delete();
+    }
 }

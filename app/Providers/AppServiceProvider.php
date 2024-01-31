@@ -2,18 +2,19 @@
 
 namespace App\Providers;
 
-use App\Adapters\Presenters\CreateProcessJsonPresenter;
+use App\Adapters\Presenters\PregaoEletronico\CreateProcessJsonPresenter;
 use App\Domain\Interfaces\PregaoEletronico\GetDataItems;
 use App\Domain\Interfaces\PregaoEletronico\GetDataProcess;
 use App\Domain\Interfaces\PregaoEletronico\ProcessFactory;
 use App\Domain\Interfaces\PregaoEletronico\ProcessRepository;
-use App\Domain\UseCases\PregaoEletronico\CreateProcessOutputPort;
+use App\Domain\UseCases\PregaoEletronico\PregaoEletronicoOutput;
 use App\Factories\PregaoEletronico\ProcessModelFactory;
 use App\Infra\Database\Repositories\External\Items\ExternalItems;
 use App\Infra\Database\Repositories\External\Process\ExternalProcess;
 use App\Infra\Database\Repositories\PregaoEletronico\ProcessDatabaseRepository;
 use App\Infra\Services\ItemService;
 use App\Infra\Services\ProcessService;
+use App\Repositories\PregaoEletronico\PregaoEletronicoRepository;
 use App\Shared\Factories\ProcessToDatabase;
 use App\Shared\Interfaces\GetItemsProcess;
 use App\Shared\Interfaces\ProcessToDatabaseFactory;
@@ -38,11 +39,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(
             ProcessRepository::class,
-            ProcessDatabaseRepository::class,
+            PregaoEletronicoRepository::class,
         );
 
         $this->app->bind(
-            CreateProcessOutputPort::class,
+            PregaoEletronicoOutput::class,
             CreateProcessJsonPresenter::class
         );
 

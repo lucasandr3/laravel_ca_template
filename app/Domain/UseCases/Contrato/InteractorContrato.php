@@ -6,9 +6,13 @@ use App\Domain\Interfaces\Contrato\ContratoRepositoryInterface;
 use App\Domain\Interfaces\Unidade\UnidadeRepositoryInterface;
 use App\Events\Contrato\ContratoErrorEvent;
 use App\Events\Contrato\ContratoSuccessEvent;
+use App\Events\Contrato\DeleteContratoEvent;
 use App\Infra\Services\HttpService;
 use App\Infra\Services\SystemParams;
 use JsonException;
+use function Symfony\Component\String\b;
+use function Symfony\Component\String\u;
+use function Symfony\Component\Translation\t;
 
 class InteractorContrato
 {
@@ -39,17 +43,50 @@ class InteractorContrato
             return $this->output->unableCreate($result?->getBody()->getContents());
         }
 
-        event(new ContratoSuccessEvent($this->output->contrato($result?->getBody()->getContents())));
+        event(new ContratoSuccessEvent($input->getContrato(), $result?->getHeader('location')));
         return $this->output->contrato(json_encode(['message' => 'contrato cadastrado com sucesso.'], JSON_THROW_ON_ERROR));
+    }
+
+    public function delContract(InputRequestContrato $input)
+    {
+        $contrato = $this->repository->getContrato($input->getSequencialContrato(), $input->getCodProcesso());
+
+        if (!$contrato) {
+            return $this->output->notFoundResource();
+        }
+
+        $parameters = $this->systemParams->contratoParams(dados: [
+            'cnpj' => $contrato->cnpj_entidade,
+            'anoCompra' => $contrato->ano_compra,
+            'sequencialContrato' => $contrato->sequencial_contrato
+        ]);
+
+        $result = $this->httpService->delete($parameters, $input->getJustificativa());
+
+        if ($result?->getStatusCode() !== STATUS_CODE_OK) {
+            return $this->output->unableDeleted($result?->getBody()->getContents());
+        }
+
+        event(new DeleteContratoEvent($contrato->id));
+        return $this->output->deleted();
     }
 
     public function sendDocumentContrato(InputRequestContratoArquivo $input)
     {
-        $contrato = $this->repository->getContrato($input->getCodContrato(), $input->getCodProcesso());
-        echo "<pre>"; var_dump($contrato); echo "</pre>"; die;
-        $parameters = $this->systemParams->contratoParams();
-        $result = $this->httpService->get($parameters)?->getBody()->getContents();
-        return $this->output->todasUnidades($result);
+        $contrato = $this->repository->getContrato($input->getSequencialContrato(), $input->getCodProcesso());
+
+        if (!$contrato) {
+            return $this->output->notFoundResource();
+        }
+
+        $parameters = $this->systemParams->contratoParams(arquivo: [
+            'cnpj' => $contrato->cnpj_entidade,
+            'anoCompra' => $contrato->ano_compra,
+            'sequencialContrato' => $contrato->sequencial_contrato
+        ]);
+
+//        $result = $this->httpService->postWithDocument([], $parameters, );
+//        return $this->output->todasUnidades($result);
     }
 
     /**

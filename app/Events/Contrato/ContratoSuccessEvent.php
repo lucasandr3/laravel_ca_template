@@ -14,13 +14,12 @@ class ContratoSuccessEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $contrato;
+    public array $contrato;
+    public array $location;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct($compra)
+    public function __construct($compra, $location)
     {
         $this->contrato = $compra;
+        $this->location = $location;
     }
 }

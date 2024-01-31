@@ -9,9 +9,13 @@ interface ContratoOutput
 {
     public function contrato(string $contrato);
 
-    public function notFoundResource(string $result);
+    public function deleted();
+
+    public function notFoundResource();
 
     public function unableCreate(string $result);
 
     public function unableUpdated(string $result);
+
+    public function unableDeleted(string $result);
 }

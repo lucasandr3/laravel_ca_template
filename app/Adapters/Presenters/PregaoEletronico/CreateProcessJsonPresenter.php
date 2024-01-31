@@ -2,26 +2,58 @@
 
 namespace App\Adapters\Presenters\PregaoEletronico;
 
-use App\Domain\Interfaces\PregaoEletronico\ViewModel;
-use App\Domain\UseCases\PregaoEletronico\CreateProcessOutputPort;
-use App\Domain\UseCases\PregaoEletronico\CreateProcessResponseModel;
+use App\Domain\UseCases\PregaoEletronico\PregaoEletronicoOutput;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-class CreateProcessJsonPresenter implements CreateProcessOutputPort
+class CreateProcessJsonPresenter implements PregaoEletronicoOutput
 {
-
-    public function processCreated(CreateProcessResponseModel $model): ViewModel
+    public function created(): JsonResponse
     {
-        echo "<pre>";var_dump('caiu aqui'); echo "</pre>";die;
+        return response()->json(['message' => 'Compra cadastrado com sucesso.']);
     }
 
-    public function processAlreadyExists(array $error): ViewModel
+    public function updated(): JsonResponse
     {
-        echo "<pre>";var_dump($error); echo "</pre>";die;
+        return response()->json(['message' => 'Compra atualizada com sucesso.']);
     }
 
-    public function unableToCreateProcess(CreateProcessResponseModel $model, \Throwable $e): ViewModel
+    public function deleted(): JsonResponse
     {
-        echo "<pre>";var_dump('caiu aqui'); echo "</pre>";die;
+        return response()->json(['message' => 'Compra excluída com sucesso.']);
     }
 
+    public function notFoundResource(): JsonResponse
+    {
+        return response()->json(['message' => 'Compra não encontrada.'], 404);
+    }
+
+    public function notFoundResourceInPncp(): JsonResponse
+    {
+        return response()->json(['message' => 'Compra não encontrada no PNCP.'], 404);
+    }
+
+    public function unableCreate(string $result): JsonResponse
+    {
+        return response()->json($this->prepareOutput($result));
+    }
+
+    public function unableUpdated(string $result)
+    {
+        return response()->json($this->prepareOutput($result));
+    }
+
+    public function unableDeleted(string $result)
+    {
+        return response()->json($this->prepareOutput($result));
+    }
+
+    public function process(string $process)
+    {
+        return response()->json($this->prepareOutput($process));
+    }
+
+    private function prepareOutput(string $output)
+    {
+        return json_decode($output);
+    }
 }

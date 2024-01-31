@@ -3,16 +3,25 @@
 namespace App\Infra\Services;
 
 use App\Infra\Database\Repositories\SystemParam;
+use Illuminate\Support\Fluent;
 
 class SystemParams
 {
-    public function sendPurchaseParams(): array
+    public function compraParams(Fluent $dados = null): array|string
     {
         $resources = [
             'LINK_SALA_DISPUTA_VISITANTE',
             'KEY_SALA_VISITANTE',
-            'LINK_POST_COMPRAS'
+            'LINK_POST_COMPRAS',
+            'LINK_DELETE_COMPRA'
         ];
+
+        $parameters = $this->prepareParams($resources);
+
+        if ($dados !== null) {
+            $url = $parameters['HOST_PNCP'] . $parameters['LINK_DELETE_COMPRA'];
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial);
+        }
 
         return $this->prepareParams($resources);
     }
@@ -82,12 +91,45 @@ class SystemParams
         return sprintf($parameters['HOST_PNCP'] . $parameters['LINK_POST_UNIDADES'], $cnpjOrgao);
     }
 
-    public function contratoParams(int|null|string $cnpjOrgao = null)
+    public function contratoParams(int|null|string $cnpjOrgao = null, array $dados = [], array $arquivo = []): string
     {
-        $resources = ['LINK_POST_CONTRATO'];
+        $resources = ['LINK_POST_CONTRATO', 'LINK_DEL_CONTRATO', 'LINK_ARQUIVO_CONTRATO'];
         $parameters = $this->prepareParams($resources);
+        $hostPNCP = $parameters['HOST_PNCP'];
+
+        if (filled($dados)) {
+            return sprintf(
+                $hostPNCP . $parameters['LINK_DEL_CONTRATO'],
+                $dados['cnpj'], $dados['anoCompra'], $dados['sequencialContrato']
+            );
+        }
+
+        if (filled($arquivo)) {
+            return sprintf(
+                $hostPNCP . $parameters['LINK_ARQUIVO_CONTRATO'],
+                $arquivo['cnpj'], $arquivo['anoCompra'], $arquivo['sequencialContrato']
+            );
+        }
 
         return sprintf($parameters['HOST_PNCP'] . $parameters['LINK_POST_CONTRATO'], $cnpjOrgao);
+    }
+
+    public function arquivoParams(Fluent $dados = null, bool $delFile = false): array|string
+    {
+        $resources = ['LINK_POST_EDITAIS', 'LINK_DELETE_EDITAIS'];
+        $parameters = $this->prepareParams($resources);
+
+        if ($dados !== null && $delFile === false) {
+            $url = $parameters['HOST_PNCP'] . $parameters['LINK_POST_EDITAIS'];
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial);
+        }
+
+        if ($dados !== null && $delFile === true) {
+            $url = $parameters['HOST_PNCP'] . $parameters['LINK_DELETE_EDITAIS'];
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial, $dados->sequencialDocumento);
+        }
+
+        return $parameters;
     }
 
     public function getAuthParams(): array
