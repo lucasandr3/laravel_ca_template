@@ -4,11 +4,12 @@ namespace App\Domain\UseCases\Arquivo;
 
 use App\Domain\Interfaces\PregaoEletronico\GetDataProcess;
 use App\Domain\Interfaces\PregaoEletronico\ProcessRepository;
-use App\Events\Arquivo\ExcluirArquivoEvent;
+use App\Events\Arquivo\AtualizaArquivoEvent;
 use App\Events\Arquivo\SalvarArquivoEvent;
 use App\Infra\Services\DocumentUtils;
 use App\Infra\Services\HttpService;
 use App\Infra\Services\SystemParams;
+use App\Repositories\Arquivo\ArquivoCompraRepository;
 use App\Shared\Interfaces\GetExternalDocument;
 use Illuminate\Support\Fluent;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,8 @@ class InteractorArquivo
 {
     public function __construct
     (
-        private readonly ProcessRepository $repository,
+        private readonly ProcessRepository $processRepository,
+        private readonly ArquivoCompraRepository $repository,
         private readonly GetDataProcess $getDataProcess,
         private readonly GetExternalDocument $externalDocument,
         private readonly SystemParams $systemParams,
@@ -30,7 +32,7 @@ class InteractorArquivo
     public function sendDocument(InputArquivoRequest $input)
     {
         $externalProcess = $this->getDataProcess->getProcessById($input->getCodProcess());
-        $compraMicroservico = $this->repository->getCompra($input->getCodProcess());
+        $compraMicroservico = $this->processRepository->getCompra($input->getCodProcess());
         $externalDocument = $this->externalDocument->getEditalDocument($input->getcodDocumento());
 
         $parameters = $this->systemParams->arquivoParams(dados: new Fluent([
@@ -49,7 +51,7 @@ class InteractorArquivo
 
         $dadosArquivo = new Fluent([
             'compra' => $compraMicroservico,
-            'edital' => $externalProcess,
+            'edital' => $externalDocument,
             'responsePncp' => $result?->getHeader('location')
         ]);
 
@@ -59,13 +61,23 @@ class InteractorArquivo
 
     public function deleteDocument(InputArquivoRequest $input)
     {
-        $compraMicroservico = $this->repository->getCompra($input->getCodProcess());
+        $compraMicroservico = $this->processRepository->getCompra($input->getCodProcess());
+
+        if ($compraMicroservico === null) {
+            return $this->output->notFoundResource();
+        }
+
+        $documentoMicroservico = $this->repository->getDocument($input->getCodProcess(), $input->getcodDocumento());
+
+        if ($documentoMicroservico === null) {
+            return $this->output->notFoundFileResource();
+        }
 
         $parameters = $this->systemParams->arquivoParams(dados: new Fluent([
             'cnpj' => $compraMicroservico->cnpj_entidade,
             'ano' => $compraMicroservico->ano,
             'sequencial' => $compraMicroservico->sequencial,
-            'sequencialDocumento' => $input->getSequencialDocumento(),
+            'sequencialDocumento' => $documentoMicroservico->sequencial_documento,
         ]), delFile: true);
 
         $result = $this->httpService->delete($parameters, $input->getReason());
@@ -74,8 +86,37 @@ class InteractorArquivo
             return $this->output->unableDeleted($result?->getBody()->getContents());
         }
 
-        event(new ExcluirArquivoEvent());
+        $dadosArquivo = new Fluent([
+            'codProcess' => $input->getCodProcess(),
+            'codDocument' => $input->getcodDocumento(),
+            'reason' => $input->getReason()
+        ]);
+
+        event(new AtualizaArquivoEvent($dadosArquivo));
         return $this->output->deleted();
+    }
+
+    public function getAllDocuments(InputArquivoRequest $input)
+    {
+        $compraMicroservico = $this->processRepository->getCompra($input->getCodProcess());
+
+        if ($compraMicroservico === null) {
+            return $this->output->notFoundResource();
+        }
+
+        $parameters = $this->systemParams->arquivoParams(new Fluent([
+            'cnpj' => $compraMicroservico->cnpj_entidade,
+            'ano' => $compraMicroservico->ano,
+            'sequencial' => $compraMicroservico->sequencial
+        ]));
+
+        $result = $this->httpService->get($parameters);
+
+        if ($result?->getStatusCode() !== Response::HTTP_OK) {
+            return $this->output->error($result?->getBody()->getContents());
+        }
+
+        return $this->output->arquivos($result?->getBody()->getContents());
     }
 
 //    public function getOrgaos(array $filtro)

@@ -132,6 +132,30 @@ class SystemParams
         return $parameters;
     }
 
+    public function itemParams(Fluent $dados = null, bool $item = false, bool $post = false, bool $result = false): array|string
+    {
+        $resources = ['LINK_GET_ITEMS', 'LINK_PUT_ITEMS', 'LINK_POST_ITEMS', 'LINK_POST_RESULTADO'];
+        $parameters = $this->prepareParams($resources);
+
+        if ($dados !== null && $item === false && $result === false) {
+            $isPost = $post ? $parameters['LINK_POST_ITEMS'] : $parameters['LINK_GET_ITEMS'];
+            $url = $parameters['HOST_PNCP'] . $isPost;
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial);
+        }
+
+        if ($dados !== null && $item === true && $result === false) {
+            $url = $parameters['HOST_PNCP'] . $parameters['LINK_PUT_ITEMS'];
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial, $dados->sequencialItem);
+        }
+
+        if ($dados !== null && $result === true) {
+            $url = $parameters['HOST_PNCP'] . $parameters['LINK_POST_RESULTADO'];
+            return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial, $dados->sequencialItem);
+        }
+
+        return $parameters;
+    }
+
     public function getAuthParams(): array
     {
         $array = [];

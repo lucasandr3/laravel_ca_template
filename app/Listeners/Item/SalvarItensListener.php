@@ -30,7 +30,9 @@ class SalvarItensListener implements ShouldQueue
     private function retornaDadosItens(Fluent $dadosCompra)
     {
         $compra = Compra::query()->where('cod_pregao', '=', $dadosCompra->externalProcess->id)->first();
-        return collect($dadosCompra->processData['itensCompra'])->map(function ($item) use ($compra, $dadosCompra) {
+        $itensCompra = isset($dadosCompra->processData) ? $dadosCompra->processData['itensCompra'] : $dadosCompra->itensCompra;
+
+        return collect($itensCompra)->map(function ($item) use ($compra, $dadosCompra) {
             return [
                 "dat_envio" => now(),
                 "cod_compra" => $compra->id,

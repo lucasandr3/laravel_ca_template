@@ -177,3 +177,9 @@ const STATUS_CODE_NOT_FOUND = 404;
 /** Reasons */
 const REASON_DEFAULT_REMOVE_PURCHASE = 'Compra enviada erroneamente.';
 const REASON_DEFAULT_REMOVE_FILE = 'Arquivo incorreto enviado anteriormente.';
+
+/** Extrato Processo */
+const CONFIG_EXTRATO_CADASTRADO = 1;
+const CONFIG_EXTRATO_PUBLICADO = 2;
+const CONFIG_EXTRATO_ADJUDICADO = 3;
+const CONFIG_EXTRATO_HOMOLOGADO = 4;

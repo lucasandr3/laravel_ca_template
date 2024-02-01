@@ -12,5 +12,7 @@ interface ArquivoRepository
 
     public function insert(array $data);
 
-    public function getCompra(int $codProcesso);
+    public function getDocument(int $codProcesso, int $codDocument);
+
+    public function updateFile(array $data, int $codProcess, int $codDocument);
 }

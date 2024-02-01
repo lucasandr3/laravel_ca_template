@@ -21,9 +21,20 @@ class ArquivoCompraRepository implements ArquivoRepository
         Compra::query()->where('cod_pregao', '=', $codCompra)->update($data);
     }
 
-    public function getCompra(int $codProcesso)
+    public function getDocument(int $codProcesso, int $codDocument)
     {
-        return Compra::query()->where('cod_pregao', '=', $codProcesso)->first();
+        return ArquivoCompra::query()
+            ->where('cod_pregao', '=', $codProcesso)
+            ->where('cod_edital', '=', $codDocument)
+        ->first();
+    }
+
+    public function updateFile(array $data, int $codProcess, int $codDocument)
+    {
+        ArquivoCompra::query()
+            ->where('cod_pregao', '=', $codProcess)
+            ->where('cod_edital', '=', $codDocument)
+        ->update($data);
     }
 
     public function removeCompra(int $codProcesso)

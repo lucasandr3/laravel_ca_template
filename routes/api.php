@@ -35,3 +35,6 @@ include __DIR__ . '/contrato.php';
 // Rotas de arquivos
 include __DIR__ . '/arquivos.php';
 
+// Rotas de Itens
+include __DIR__ . '/itens.php';
+

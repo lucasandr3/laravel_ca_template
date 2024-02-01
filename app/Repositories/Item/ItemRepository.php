@@ -15,4 +15,12 @@ class ItemRepository
     {
         Item::query()->where('cod_compra', '=', $codCompra)->delete();
     }
+
+    public function updateOneItem(array $data, $codProcesso, $codItem)
+    {
+        Item::query()
+            ->where('cod_pregao', '=', $codProcesso)
+            ->where('numero_item', '=', $codItem)
+        ->update($data);
+    }
 }

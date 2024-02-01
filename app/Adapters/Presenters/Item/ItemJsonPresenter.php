@@ -1,15 +1,25 @@
 <?php
 
-namespace App\Adapters\Presenters\Arquivo;
+namespace App\Adapters\Presenters\Item;
 
-use App\Domain\UseCases\Arquivo\ArquivoOutput;
+use App\Domain\UseCases\Item\ItemOutput;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class ArquivoJsonPresenter implements ArquivoOutput
+class ItemJsonPresenter implements ItemOutput
 {
     public function notFoundResource(): JsonResponse
     {
         return response()->json(['message' => 'Compra não encontrada.'], 404);
+    }
+
+    public function notFoundPurchaseResource(): JsonResponse
+    {
+        return response()->json(['message' => 'Compra não encontrada.'], 404);
+    }
+
+    public function notFoundExternalResource(): JsonResponse
+    {
+        return response()->json(['message' => 'Processo Externo não encontrado.'], 404);
     }
 
     public function notFoundFileResource(): JsonResponse
@@ -29,7 +39,17 @@ class ArquivoJsonPresenter implements ArquivoOutput
 
     public function success(): JsonResponse
     {
-        return response()->json(['message' => 'Documento enviado com sucesso.']);
+        return response()->json(['message' => 'Item atualizado com sucesso.']);
+    }
+
+    public function successPostResult(): JsonResponse
+    {
+        return response()->json(['message' => 'Resultado enviado com sucesso.']);
+    }
+
+    public function created(): JsonResponse
+    {
+        return response()->json(['message' => 'Items cadastrados com sucesso.']);
     }
 
     public function deleted(): JsonResponse
@@ -42,7 +62,7 @@ class ArquivoJsonPresenter implements ArquivoOutput
         return response()->json($this->prepareOutput($result));
     }
 
-    public function arquivos(string $result)
+    public function itens(string $result)
     {
         return response()->json($this->prepareOutput($result));
     }

@@ -178,7 +178,8 @@ return [
         App\Providers\Orgao\OrgaoProvider::class,
         App\Providers\Unidade\UnidadeProvider::class,
         App\Providers\Contrato\ContratoProvider::class,
-        App\Providers\Arquivo\ArquivoProvider::class
+        App\Providers\Arquivo\ArquivoProvider::class,
+        App\Providers\Item\ItemProvider::class
     ])->toArray(),
 
     /*

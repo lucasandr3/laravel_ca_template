@@ -21,11 +21,16 @@ class ArquivoController extends Controller
         ));
     }
 
-    public function deleteDocument(int $codProcesso, int $sequencial)
+    public function deleteDocument(int $codProcesso, int $codDocumento)
     {
         return $this->interactor->deleteDocument(new InputArquivoRequest([
             'codProcesso' => $codProcesso,
-            'sequencial' => $sequencial
+            'codDocumento' => $codDocumento
         ]));
+    }
+
+    public function readAllDocuments(int $codProcesso)
+    {
+        return $this->interactor->getAllDocuments(new InputArquivoRequest(['codProcesso' => $codProcesso]));
     }
 }

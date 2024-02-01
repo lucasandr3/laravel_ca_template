@@ -2,22 +2,24 @@
 
 namespace App\Providers;
 
-use App\Events\Arquivo\ExcluirArquivoEvent;
+use App\Events\Arquivo\AtualizaArquivoEvent;
 use App\Events\Arquivo\SalvarArquivoEvent;
 use App\Events\Contrato\ContratoErrorEvent;
 use App\Events\Contrato\ContratoSuccessEvent;
 use App\Events\Contrato\DeleteContratoEvent;
+use App\Events\Item\AtualizaItemEvent;
 use App\Events\Item\ExcluirItemEvent;
 use App\Events\Item\SalvarItemEvent;
 use App\Events\Processo\AtualizarProcessoEvent;
 use App\Events\Processo\ExcluirProcessoEvent;
 use App\Events\Processo\SalvarProcessoEvent;
 use App\Events\TestEvent;
-use App\Listeners\Arquivo\ExcluirArquivoListener;
+use App\Listeners\Arquivo\AtualizaArquivoListener;
 use App\Listeners\Arquivo\SalvarArquivoListener;
 use App\Listeners\Contrato\DeletaContrato;
 use App\Listeners\Contrato\ErroContrato;
 use App\Listeners\Contrato\SalvaContrato;
+use App\Listeners\Item\AtualizaItemListener;
 use App\Listeners\Item\ExcluirItensListener;
 use App\Listeners\Item\SalvarItensListener;
 use App\Listeners\Processo\AtualizarProcessoListener;
@@ -63,14 +65,17 @@ class EventServiceProvider extends ServiceProvider
         SalvarItemEvent::class => [
             SalvarItensListener::class
         ],
+        AtualizaItemEvent::class => [
+            AtualizaItemListener::class
+        ],
         ExcluirItemEvent::class => [
             ExcluirItensListener::class
         ],
         SalvarArquivoEvent::class => [
             SalvarArquivoListener::class
         ],
-        ExcluirArquivoEvent::class => [
-            ExcluirArquivoListener::class
+        AtualizaArquivoEvent::class => [
+            AtualizaArquivoListener::class
         ]
     ];
 

@@ -11,27 +11,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ExcluirArquivoEvent implements ShouldQueue
+class AtualizaArquivoEvent implements ShouldQueue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public $dadosArquivo;
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
+    public function __construct($dadosArquivo)
     {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        $this->dadosArquivo = $dadosArquivo;
     }
 }
