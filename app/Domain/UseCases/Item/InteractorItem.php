@@ -10,6 +10,9 @@ use App\Events\Item\SalvarItemEvent;
 use App\Factories\PregaoEletronico\ItemModelFactory;
 use App\Infra\Services\HttpService;
 use App\Infra\Services\SystemParams;
+use App\Repositories\Item\ItemRepository;
+use App\Shared\Interfaces\GetDataCompany;
+use App\Shared\Interfaces\GetDataStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Fluent;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +24,9 @@ class InteractorItem
         private readonly ProcessRepository $processRepository,
         private readonly GetDataProcess $getDataProcess,
         private readonly GetDataItems $getDataItems,
+        private readonly GetDataCompany $dataCompany,
+        private readonly GetDataStatus $dataStatus,
+        private readonly ItemRepository $repository,
         private readonly SystemParams $systemParams,
         private readonly ItemModelFactory $factory,
         private readonly HttpService $httpService,
@@ -191,14 +197,14 @@ class InteractorItem
             'ano' => $compraMicroservico->ano,
             'sequencial' => $compraMicroservico->sequencial,
             'sequencialItem' => current($itemData->getItems())['numeroItem']
-        ]), result: true);
+        ]), item: true);
 
         $dataToUpdate = [
             'endpoint' => $parameters,
             'body' => current($itemData->getItems())
         ];
 
-        $result = $this->httpService->post($dataToUpdate, true);
+        $result = $this->httpService->put($dataToUpdate);
 
         if ($result?->getStatusCode() !== Response::HTTP_OK) {
             return $this->output->error($result?->getBody()->getContents());
@@ -222,138 +228,162 @@ class InteractorItem
         }
 
         $externalItems = $this->getDataItems->getItemsByProcess($input->getCodProcess());
-        $homogationDate = $this->getDataProcess->getHomologationDate($input->getCodProcess(), CONFIG_EXTRATO_HOMOLOGADO);
+        $homologationDate = $this->getDataProcess->getHomologationDate($input->getCodProcess(), CONFIG_EXTRATO_HOMOLOGADO);
 
-        if ($homogationDate === null) {
+        if ($homologationDate === null) {
             return $this->output->error(json_encode(['message' => 'Processo não está homologado']));
         }
 
         foreach ($externalItems as $item) {
             $lote = $this->getDataItems->getLoteDoItem($input->getCodProcess(), $item->cod_lote);
-            $empresaVencedora = $this->getDataItems->getVencedorDoLote($lote->cod_vencedor);
 
-            if (!$empresaVencedora) {
-                $this->updateOneItem(new InputItemRequest([
-                    'codProcesso' => $externalProcess->id,
-                    'codItem' => $item->id
-                ]));
+            if ($lote->cod_vencedor === null) {
                 continue;
             }
 
-            $this->updateItemResult($input);
+            $empresaVencedora = $this->getDataItems->getVencedorDoLote($lote->cod_vencedor);
+            $this->updateOneItem(new InputItemRequest([
+                    'codProcesso' => $externalProcess->id,
+                    'codItem' => $item->id
+                ]));
 
-            $parameters = $this->systemParams->itemParams(new Fluent([
-                'cnpj' => $compraMicroservico->cnpj_entidade,
-                'ano' => $compraMicroservico->ano,
-                'sequencial' => $compraMicroservico->sequencial,
-                'sequencialItem' => $item->id
-            ]), result: true);
 
-            $data = $this->getPurchaseItemResult($item, $process, $batch, $homologationDate);
-            $purchaseItem = $item->purchaseItem();
+            $this->updateItemResult(new InputItemRequest([
+                'codItem' => $item->id,
+                'codProcesso' => $externalProcess->id
+            ]));
 
-            if (!empty($purchaseItem->sequencial_resultado)) {
-                $endpoint = $params['HOST_PNCP'] . sprintf($params['LINK_PUT_RESULTADO'], $administration->cnpj, $purchase->ano, $purchase->sequencial, $item->id, $purchaseItem->sequencial_resultado);
-                #validar se justificativa é obrigatório
-                $response = Helpers::request(CONFIG_REST_PUT, $endpoint, [
-                    'headers' => ['Authorization' => $authorization],
-                    'json' => $data
-                ]);
+            $dataResultadoItem = $this->getPurchaseItemResult($item, $externalProcess, $lote, $empresaVencedora, $homologationDate);
+            $itemMicroservico = $this->repository->getItemById($item->id);
+
+            if (!empty($itemMicroservico->sequencial_resultado)) {
+
+                $parameters = $this->systemParams->itemParams(new Fluent([
+                    'cnpj' => $compraMicroservico->cnpj_entidade,
+                    'ano' => $compraMicroservico->ano,
+                    'sequencial' => $compraMicroservico->sequencial,
+                    'sequencialItem' => $item->id,
+                    'sequencialResultado' => $itemMicroservico->sequencial_resultado
+                ]), result: true);
+
+                $dataToUpdate = [
+                    'body' => $dataResultadoItem,
+                    'endpoint' => $parameters
+                ];
+
+                $result = $this->httpService->put($dataToUpdate);
+
             } else {
-                $response = Helpers::request(CONFIG_REST_POST, $endpoint, [
-                    'headers' => ['Authorization' => $authorization],
-                    'json' => $data
-                ]);
+                $parameters = $this->systemParams->itemParams(new Fluent([
+                    'cnpj' => $compraMicroservico->cnpj_entidade,
+                    'ano' => $compraMicroservico->ano,
+                    'sequencial' => $compraMicroservico->sequencial,
+                    'sequencialItem' => $item->id
+                ]), result: true);
+
+                $dataToPost = [
+                    'body' => $dataResultadoItem,
+                    'endpoint' => $parameters,
+                ];
+
+                $result = $this->httpService->post($dataToPost, true);
             }
 
-            if (!in_array($response->getStatusCode(), [STATUS_CODE_OK, STATUS_CODE_CREATED])) {
-                $this->requestLogService->saveLogImp($response, CONFIG_CONSUMER_CADASTRAR_RESULTADO, $processId, $data);
-            } else {
-                $data['homologationDate'] = $homologationDate;
-                $this->purchaseItemService->updatePurchaseItem($response, $authorization, $purchaseItem, $data);
+            if (!in_array($result?->getStatusCode(), [Response::HTTP_OK, Response::HTTP_CREATED])) {
+                return $this->output->error($result?->getBody()->getContents());
             }
+
+            $novoSequencialResultado = $this->getPurchaseResultUrlImp(current($result?->getHeader('location')));
+
+            if ($novoSequencialResultado?->getStatusCode() !== Response::HTTP_OK) {
+                return $this->output->error($novoSequencialResultado?->getBody()->getContents());
+            }
+
+            $resultado = json_decode($novoSequencialResultado?->getBody()->getContents());
+
+            $dataResultadoItem['homologationDate'] = $homologationDate->dat_registro->format('Y-m-d');
+            $dataResultadoItem['sequencialResultado'] = $resultado->sequencialResultado;
+
+            $dataPurchaseItem = new Fluent([
+                'compra' => $compraMicroservico,
+                'externalProcess' => $externalProcess,
+                'data' => $dataResultadoItem,
+                'response' => $result?->getHeader('location'),
+                'item' => $itemMicroservico
+            ]);
+
+            event(new AtualizaItemEvent($dataPurchaseItem));
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-//        $itemsPncp = $this->getAllItems($input);
-//
-//        if ($itemsPncp->getStatusCode() !== Response::HTTP_OK) {
-//            return $this->output->error($itemsPncp->getContent());
-//        }
-//
-//        $codesItemsPncp = array_column(json_decode($itemsPncp->getContent()), 'numeroItem');
-//        $itemsToRegister = new Collection([]);
-//
-//        foreach ($externalItems as $itemLicitanet) {
-//            if (in_array($itemLicitanet->id, $codesItemsPncp)) {
-//                $this->updateOneItem(new InputItemRequest([
-//                    'codProcesso' => $externalProcess->id,
-//                    'codItem' => $itemLicitanet->id
-//                ]));
-//            } else {
-//                $itemsToRegister->push($itemLicitanet);
-//            }
-//        }
-//
-//        if ($itemsToRegister->isNotEmpty()) {
-//            $this->sendItems($itemsToRegister, $externalProcess->id, $compraMicroservico);
-//        }
-//
-//        return $this->output->success();
+        return $this->output->successPostResult();
     }
 
-    private function getPurchaseItemResult(Item $item, Process $process, Batch $batch, string $homologationDate): array
+    private function getPurchaseItemResult($item, $externalProcess, $lote, $empresaVencedora, $homologationDate): array
     {
-        $winningCompany = $batch->winner();
-        $winningBid = $batch->winningBid();
+        $porteEmpresaVencedora = $this->dataCompany->getPorteFornecedor($empresaVencedora->cod_enquadramento);
+        $lanceVencedor = $this->dataCompany->getLanceVencedor($lote->cod_lance_vencedor);
+        $status = $this->dataStatus->getStatusById($lote->cod_status);
 
-        $quantity = Helpers::formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $item->quantidade, '.', '');
+        $quantity = formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $item->quantidade, '.', '');
 
-        if ($process->cod_tipo_pregao == CONFIG_JULGAMENTO_MENOR_I) {
-            $unityValue = Helpers::formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $winningBid->valor, '.', '');
+        if ($externalProcess->cod_tipo_pregao == CONFIG_JULGAMENTO_MENOR_I) {
+            $unityValue = formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $lanceVencedor->valor, '.', '');
 
-            $totalValue = bcmul($quantity, $winningBid->valor, CONFIG_MONETARIO_PRECISAO);
+            $totalValue = bcmul($quantity, $lanceVencedor->valor, CONFIG_MONETARIO_PRECISAO);
         } else {
-            $unityValue = $item->valor_final ?? ($winningBid->valor / $quantity);
-            $unityValue = Helpers::formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $unityValue, '.', '');
+            $unityValue = $item->valor_final ?? ($lanceVencedor->valor / $quantity);
+            $unityValue = formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $unityValue, '.', '');
 
             $totalValue = bcmul($item->quantidade, $unityValue, CONFIG_MONETARIO_PRECISAO);
         }
 
-        $totalValue = Helpers::formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $totalValue, '.', '');
+        $totalValue = formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $totalValue, '.', '');
 
-        $porteFornecedor = $winningCompany->framing() === null
+        $porteFornecedor = $porteEmpresaVencedora === null
             ? CONFIG_PORTE_NAO_INFORMADO
-            : $this->getFramingCompanyImp($winningCompany->framing()->sigla);
+            : getFramingCompanyImp($porteEmpresaVencedora->sigla);
 
         return [
             "quantidadeHomologada" => $quantity,
             "valorUnitarioHomologado" => $unityValue,
             "valorTotalHomologado" => $totalValue,
-            "percentualDesconto" => $item->valor_orcado > 0 ? $this->getPercent($item) : floatval(0),
+            "percentualDesconto" => $item->valor_orcado > 0 ? $this->getPercent($externalProcess, $lanceVencedor, $item) : 0.0,
             "porteFornecedorId" => $porteFornecedor,
             "codigoPais" => CONFIG_ISO_BRASIL,
-            "tipoPessoaId" => (!$winningCompany->cnpj ? CONFIG_PESSOA_FISICA : CONFIG_PESSOA_JURIDICA),
-            "niFornecedor" => (!$winningCompany->cnpj ? $winningCompany->num_cpf : $winningCompany->cnpj),
-            "nomeRazaoSocialFornecedor" => $winningCompany->nome,
+            "tipoPessoaId" => (!$empresaVencedora->cnpj ? CONFIG_PESSOA_FISICA : CONFIG_PESSOA_JURIDICA),
+            "niFornecedor" => (!$empresaVencedora->cnpj ? $empresaVencedora->num_cpf : $empresaVencedora->cnpj),
+            "nomeRazaoSocialFornecedor" => $empresaVencedora->nome,
             "indicadorSubcontratacao" => CONFIG_INDICADOR_SUBCONTRATACAO_NAO,
             "ordemClassificacaoSrp" => 1,
-            "dataResultado" => $homologationDate,
-            'situacaoCompraItemResultadoId' => $this->getPurchaseItemResultSituationImp($batch->status()->nome),
+            "dataResultado" => $homologationDate->dat_registro->format('Y-m-d'),
+            'situacaoCompraItemResultadoId' => getPurchaseItemResultSituationImp($status->nome),
 //            "dataCancelamento" => null, #preencher se cancelado
 //            "motivoCancelamento" => null, #preencher se cancelado
 //            "justificativa" => null, #preencher se cancelado
         ];
+    }
+
+    private function getPercent($externalProcess, $lanceVencedor, $item): float
+    {
+        $maiorValor = in_array($externalProcess->cod_tipo_pregao, [
+            CONFIG_JULGAMENTO_MAIOR_D,
+            CONFIG_JULGAMENTO_MAIOR_L,
+            CONFIG_JULGAMENTO_MAIOR_DL,
+            CONFIG_JULGAMENTO_MAIOR_P
+        ]);
+
+        $lanceVenc = $lanceVencedor->valor;
+        $value = $item->valor_final ?? ($lanceVenc / $item->quantidade);
+
+        $economy = $maiorValor ?
+            ($value - $item->valor_orcado) / $item->valor_orcado * 100 :
+            ($item->valor_orcado - $value) / $item->valor_orcado * 100;
+
+        return formatValueWithPrecision(CONFIG_MONETARIO_PRECISAO, $economy, '.', '');
+    }
+
+    private function getPurchaseResultUrlImp(string $url)
+    {
+        return $this->httpService->get($url);
     }
 }

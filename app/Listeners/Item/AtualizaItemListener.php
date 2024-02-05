@@ -31,30 +31,29 @@ class AtualizaItemListener
         (new ItemRepository())->updateOneItem($dataToUpdate, $codProcesso, $codItem);
     }
 
-    private function retornaDados(Fluent $dadosCompra, $codProcesso): array
+    private function retornaDados(Fluent $dadosItem, $codProcesso): array
     {
         return [
-            "dat_envio" => now(),
-            "cod_compra" => $dadosCompra->compra->id,
+            "cod_compra" => $dadosItem->compra->id,
             "cod_pregao" => $codProcesso,
-            "numero_item" => $dadosCompra->item['numeroItem'],
-            "material_servico" => $dadosCompra->item['materialOuServico'],
-            "tipo_beneficio" => $dadosCompra->item['tipoBeneficioId'],
-            "incentivo_produtivo_basico" => $dadosCompra->item['incentivoProdutivoBasico'],
-            "descricao" => $dadosCompra->item['descricao'],
-            "quantidade" => $dadosCompra->item['quantidade'],
-            "unidade_medida" => $dadosCompra->item['unidadeMedida'],
-            "valor_unitario_estimado" => $dadosCompra->item['valorUnitarioEstimado'],
-            "valor_total" => $dadosCompra->item['valorTotal'],
-            "situacao_compra_item" => $dadosCompra->item['situacaoCompraItemId'],
-            "criterio_julgamento" => $dadosCompra->item['criterioJulgamentoId'],
-            "cod_situacao_item" => $dadosCompra->item['situacaoCompraItemId'],
-            "valor_unitario_homologado" => null,
-            "valor_total_homologado" => null,
-            "percentual_desconto" => null,
-            "data_resultado" => null,
-            "sequencial_resultado" => null,
-            'cod_lote' => $dadosCompra->item['codLote']
+            "numero_item" => $dadosItem->item['numeroItem'],
+            "material_servico" => $dadosItem->item['materialOuServico'],
+            "tipo_beneficio" => $dadosItem->item['tipoBeneficioId'],
+            "incentivo_produtivo_basico" => $dadosItem->item['incentivoProdutivoBasico'],
+            "descricao" => $dadosItem->item['descricao'],
+            "quantidade" => $dadosItem->item['quantidade'],
+            "unidade_medida" => $dadosItem->item['unidadeMedida'],
+            "valor_unitario_estimado" => $dadosItem->item['valorUnitarioEstimado'],
+            "valor_total" => $dadosItem->item['valorTotal'],
+            "situacao_compra_item" => $dadosItem->item['situacaoCompraItemId'],
+            "criterio_julgamento" => $dadosItem->item['criterioJulgamentoId'],
+            "cod_situacao_item" => $dadosItem->item['situacaoCompraItemId'],
+            "valor_unitario_homologado" => $dadosItem->item['valorUnitarioHomologado'] ?? null,
+            "valor_total_homologado" => $dadosItem->item['valorTotalHomologado'] ?? null,
+            "percentual_desconto" => $dadosItem->item['percentualDesconto'] ?? null,
+            "data_resultado" => $dadosItem->data['homologationDate'] ?? null,
+            "sequencial_resultado" => $dadosItem->data['sequencialResultado'] ?? null,
+            'cod_lote' => $dadosItem->item['codLote']
         ];
     }
 }

@@ -206,3 +206,27 @@ function encryptParam($data, string $key): string
 
     return urlencode(base64_encode($result));
 }
+
+function getFramingCompanyImp(string $framing): int
+{
+    switch (strtolower($framing)) {
+        case 'me':
+            return CONFIG_PORTE_ME;
+        case 'epp':
+            return CONFIG_PORTE_EPP;
+        default:
+            return CONFIG_PORTE_DEMAIS;
+    }
+}
+
+function getPurchaseItemResultSituationImp(string $batchStatus): int
+{
+    switch (strtolower($batchStatus)) {
+        case 'deserto':
+        case 'cancelado':
+        case 'fracassado':
+            return CONFIG_SITUACAO_RESULTADO_ITEM_CANCELADO;
+        default:
+            return CONFIG_SITUACAO_RESULTADO_ITEM_INFORMADO;
+    }
+}

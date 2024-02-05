@@ -134,7 +134,7 @@ class SystemParams
 
     public function itemParams(Fluent $dados = null, bool $item = false, bool $post = false, bool $result = false): array|string
     {
-        $resources = ['LINK_GET_ITEMS', 'LINK_PUT_ITEMS', 'LINK_POST_ITEMS', 'LINK_POST_RESULTADO'];
+        $resources = ['LINK_GET_ITEMS', 'LINK_PUT_ITEMS', 'LINK_POST_ITEMS', 'LINK_POST_RESULTADO', 'LINK_PUT_RESULTADO'];
         $parameters = $this->prepareParams($resources);
 
         if ($dados !== null && $item === false && $result === false) {
@@ -149,6 +149,12 @@ class SystemParams
         }
 
         if ($dados !== null && $result === true) {
+
+            if ($dados->sequencialResultado) {
+                $url = $parameters['HOST_PNCP'] . $parameters['LINK_PUT_RESULTADO'];
+                return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial, $dados->sequencialItem, $dados->sequencialResultado);
+            }
+
             $url = $parameters['HOST_PNCP'] . $parameters['LINK_POST_RESULTADO'];
             return sprintf($url, $dados->cnpj, $dados->ano, $dados->sequencial, $dados->sequencialItem);
         }

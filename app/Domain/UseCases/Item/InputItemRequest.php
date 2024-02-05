@@ -16,7 +16,7 @@ class InputItemRequest
         return $this->attributes['codProcesso'] ?? '';
     }
 
-    public function getCodItem(): string
+    public function getCodItem(): string|int
     {
         return $this->attributes['codItem'] ?? '';
     }
